@@ -1,6 +1,7 @@
 resource "aws_iam_policy" "terraform_backend_policy" {
   name        = "TerraformBackendAccess"
-  description = "Permissions to access S3 and DynamoDB for Terraform remote backend with locking"
+  description = "Permissions to access S3 and DynamoDB for Terraform backend with locking"
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -26,13 +27,8 @@ resource "aws_iam_policy" "terraform_backend_policy" {
           "dynamodb:DescribeTable",
           "dynamodb:DescribeContinuousBackups"
         ],
-        Resource = "arn:aws:dynamodb:us-east-1:651706766953:table/terraform-lock-h6lnlvaa"
+        Resource = "arn:aws:dynamodb:us-east-1:651706766953:table/terraform-lock-*"
       }
     ]
   })
-}
-
-resource "aws_iam_user_policy_attachment" "attach_backend_policy" {
-  user       = "vchironi" # 👈 nome utente IAM
-  policy_arn = aws_iam_policy.terraform_backend_policy.arn
 }
