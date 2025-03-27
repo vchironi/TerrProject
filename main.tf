@@ -1,11 +1,4 @@
-terraform {
-  backend "s3" {
-    bucket         = "terraform-state-filebuckett"
-    key            = "state/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-  }
-}
+
 
 # Create an IAM policy and attach it to the user
 resource "aws_iam_policy" "terraform_backend_policy_s3_only" {
