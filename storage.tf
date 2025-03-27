@@ -1,49 +1,19 @@
-
-
-# IAM Policy for DynamoDB and S3 operations
-resource "aws_iam_policy" "terraform_state_policy" {
-  name        = "terraform-state-management-policy"
-  path        = "/"
-  description = "Policy for Terraform state management"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "dynamodb:CreateTable",
-          "dynamodb:DescribeTable",
-          "dynamodb:DeleteTable",
-          "dynamodb:ListTables",
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:TagResource",
-          "dynamodb:UntagResource",
-          
-          "s3:CreateBucket",
-          "s3:ListBucket",
-          "s3:GetBucketVersioning",
-          "s3:PutBucketVersioning",
-          "s3:GetEncryptionConfiguration",
-          "s3:PutEncryptionConfiguration",
-          "s3:PutBucketPublicAccessBlock"
-        ]
-        Resource = [
-          "arn:aws:dynamodb:us-east-1:651706766953:table/*",
-          "arn:aws:s3:::*"
-        ]
-      }
-    ]
-  })
+provider "aws" {
+  region = "us-east-1"
 }
 
-# Attach policy to current user
-resource "aws_iam_user_policy_attachment" "terraform_state_policy_attachment" {
-  user       = "vchironi"
-  policy_arn = aws_iam_policy.terraform_state_policy.arn
+# Terraform configuration for providers
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
 }
 
 # Generate a unique suffix
@@ -60,8 +30,6 @@ resource "aws_s3_bucket" "terraform_state" {
   lifecycle {
     prevent_destroy = true
   }
-
-  depends_on = [aws_iam_user_policy_attachment.terraform_state_policy_attachment]
 }
 
 # Versioning
@@ -103,8 +71,6 @@ resource "aws_dynamodb_table" "terraform_locks" {
     name = "LockID"
     type = "S"
   }
-
-  depends_on = [aws_iam_user_policy_attachment.terraform_state_policy_attachment]
 }
 
 # Outputs
