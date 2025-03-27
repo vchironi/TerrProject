@@ -1,9 +1,6 @@
 # storage.tf
 
-# Specify the provider
-provider "aws" {
-  region = "us-west-2"  # Change to your preferred region
-}
+
 
 # Create S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state" {
