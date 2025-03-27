@@ -1,12 +1,16 @@
-# storage.tf
 
 
+# Generate a unique bucket name
+resource "random_string" "bucket_suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
 
 # Create S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "your-unique-terraform-state-bucket"  # IMPORTANT: Must be globally unique
+  bucket = "terraform-state-${random_string.bucket_suffix.result}"
   
-  # Prevent deletion of the bucket
   lifecycle {
     prevent_destroy = true
   }
@@ -33,7 +37,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_e
 
 # Create DynamoDB table for state locking
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "terraform-lock"
+  name         = "terraform-lock-${random_string.bucket_suffix.result}"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
@@ -43,7 +47,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
-# Optional: Bucket public access block for additional security
+# Optional: Bucket public access block
 resource "aws_s3_bucket_public_access_block" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -51,4 +55,9 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+# Output the bucket name for reference
+output "state_bucket_name" {
+  value = aws_s3_bucket.terraform_state.id
 }
