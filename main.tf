@@ -8,6 +8,28 @@ resource "aws_iam_user" "users" {
   name     = each.key
 }
 
+# Define the IAM policy
+resource "aws_iam_policy" "dynamodb_policy" {
+  name        = "DynamoDBDescribeContinuousBackupsPolicy"
+  description = "Policy to allow DescribeContinuousBackups on DynamoDB table"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = "dynamodb:DescribeContinuousBackups",
+        Resource = "arn:aws:dynamodb:us-east-1:651706766953:table/terraform-lock-mrim150c"
+      }
+    ]
+  })
+}
+
+
+
+
+
+
+
 # Attach Read-Only EC2 Policy to Users
 resource "aws_iam_user_policy_attachment" "readonly" {
   for_each   = aws_iam_user.users
