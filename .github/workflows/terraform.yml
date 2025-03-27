@@ -56,6 +56,7 @@ jobs:
         with:
           name: tfplan
           path: tfplan
+          if-no-files-found: error
 
   wait-for-approval:
     name: Manual Approval
