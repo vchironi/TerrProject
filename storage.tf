@@ -1,19 +1,5 @@
 
 
-# Terraform configuration for providers
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.0"
-    }
-  }
-}
-
 # IAM Policy for DynamoDB and S3 operations
 resource "aws_iam_policy" "terraform_state_policy" {
   name        = "terraform-state-management-policy"
