@@ -1,4 +1,5 @@
-name: Deploy IAM Users with Terraform
+name: Deploy Terraform Backend (S3 Only)
+
 on:
   push:
     branches:
@@ -10,20 +11,23 @@ env:
 
 jobs:
   validate:
-    name: Validate Terraform
+    name: Terraform Validate
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -reconfigure
         working-directory: ${{ env.TF_WORKING_DIR }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
+
       - name: Terraform Validate
         run: terraform validate
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -32,34 +36,38 @@ jobs:
     name: Terraform Plan
     runs-on: ubuntu-latest
     needs: validate
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -reconfigure
         working-directory: ${{ env.TF_WORKING_DIR }}
+
       - name: Terraform Plan
         run: terraform plan -out=tfplan
         working-directory: ${{ env.TF_WORKING_DIR }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - name: Upload Terraform Plan
+
+      - name: Upload tfplan
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: ${{ env.TF_WORKING_DIR }}/tfplan
-          retention-days: 1
 
   wait-for-approval:
-    name: Manual Approval
+    name: Wait for Manual Approval
     runs-on: ubuntu-latest
     needs: plan
     environment: production
     steps:
-      - name: Wait for manual approval
+      - name: Await approval
         run: echo "Waiting for manual approval..."
 
   apply:
@@ -67,22 +75,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: wait-for-approval
     environment: production
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -reconfigure
         working-directory: ${{ env.TF_WORKING_DIR }}
-      - name: Download Terraform Plan
+
+      - name: Download tfplan
         uses: actions/download-artifact@v4
         with:
           name: tfplan
           path: ${{ env.TF_WORKING_DIR }}
+
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
         working-directory: ${{ env.TF_WORKING_DIR }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
