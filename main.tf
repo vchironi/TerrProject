@@ -8,6 +8,10 @@ provider "aws" {
 # Create Create an IAM policy and attach it to the useruseruseruseruseruser
 # Create Create an IAM policy and attach it to the useruseruseruseruseruser
 # Create Create an IAM policy and attach it to the useruseruseruseruseruser
+# Create Create an IAM policy and attach it to the useruseruseruseruseruser
+# Create Create an IAM policy and attach it to the useruseruseruseruseruser
+# Create Create an IAM policy and attach it to the useruseruseruseruseruser
+# Create Create an IAM policy and attach it to the useruseruseruseruseruser
 # Create Create an IAM policy and attach it to the useruseruseruseruse  ruser
 # Create Create an  IAM policy and attach it to the user
 resource "aws_iam_policy" "terraform_backend_policy_s3_only" {
