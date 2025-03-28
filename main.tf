@@ -2,7 +2,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Create Create an IAM policy and attach it to the user
+# Create Create an IAM policy and attach it to the useruseruseruseruseruser
 # Create Create an  IAM policy and attach it to the user
 resource "aws_iam_policy" "terraform_backend_policy_s3_only" {
   name        = "TerraformBackendS3Only-v2"
