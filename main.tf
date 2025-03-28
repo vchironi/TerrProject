@@ -5,7 +5,7 @@ provider "aws" {
 # Create Create an IAM policy and attach it to the user
 # Create Create an  IAM policy and attach it to the user
 resource "aws_iam_policy" "terraform_backend_policy_s3_only" {
-  name        = "TerraformBackendS3Only"
+  name        = "TerraformBackendS3Only-v2"
   description = "Permissions for Terraform to use S3 backend without locking"
 
   policy = jsonencode({
